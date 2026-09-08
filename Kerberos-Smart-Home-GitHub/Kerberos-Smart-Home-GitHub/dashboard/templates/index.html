@@ -1,0 +1,1629 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Kerberos Security Dashboard
+    </title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+
+            margin: 0;
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            background:
+                #0f172a;
+
+            color:
+                #e2e8f0;
+        }
+
+        header {
+
+            padding:
+                24px 32px;
+
+            background:
+                #111827;
+
+            border-bottom:
+                1px solid #334155;
+        }
+
+        header h1 {
+
+            margin: 0;
+
+            font-size:
+                30px;
+        }
+
+        header p {
+
+            margin:
+                8px 0 0;
+
+            color:
+                #94a3b8;
+        }
+
+        main {
+
+            padding:
+                24px 32px;
+        }
+
+        .grid {
+
+            display:
+                grid;
+
+            grid-template-columns:
+                repeat(
+                    auto-fit,
+                    minmax(
+                        210px,
+                        1fr
+                    )
+                );
+
+            gap:
+                18px;
+        }
+
+        .card {
+
+            background:
+                #1e293b;
+
+            border:
+                1px solid #334155;
+
+            border-radius:
+                14px;
+
+            padding:
+                20px;
+        }
+
+        .label {
+
+            color:
+                #94a3b8;
+
+            font-size:
+                12px;
+
+            text-transform:
+                uppercase;
+
+            letter-spacing:
+                1px;
+        }
+
+        .value {
+
+            margin-top:
+                10px;
+
+            font-size:
+                28px;
+
+            font-weight:
+                bold;
+        }
+
+        .small-value {
+
+            margin-top:
+                8px;
+
+            font-size:
+                18px;
+
+            font-weight:
+                bold;
+        }
+
+        .safe {
+            color: #4ade80;
+        }
+
+        .alert {
+            color: #f87171;
+        }
+
+        .degraded {
+            color: #facc15;
+        }
+
+        .lockdown {
+            color: #fb7185;
+        }
+
+        .unknown {
+            color: #94a3b8;
+        }
+
+        .good {
+            color: #4ade80;
+        }
+
+        .bad {
+            color: #f87171;
+        }
+
+        .warning {
+            color: #facc15;
+        }
+
+        .muted {
+            color: #64748b;
+        }
+
+        .section {
+
+            margin-top:
+                24px;
+        }
+
+        .section h2 {
+
+            margin:
+                0 0 14px;
+
+            font-size:
+                20px;
+        }
+
+        .device {
+
+            padding:
+                16px;
+
+            margin-bottom:
+                10px;
+
+            background:
+                #0f172a;
+
+            border:
+                1px solid #334155;
+
+            border-radius:
+                10px;
+        }
+
+        .device-header {
+
+            display:
+                flex;
+
+            justify-content:
+                space-between;
+
+            align-items:
+                center;
+
+            gap:
+                12px;
+        }
+
+        .device-name {
+
+            font-size:
+                17px;
+
+            font-weight:
+                bold;
+        }
+
+        .status-badge {
+
+            padding:
+                5px 9px;
+
+            border-radius:
+                999px;
+
+            font-size:
+                11px;
+
+            font-weight:
+                bold;
+        }
+
+        .trusted-badge {
+
+            background:
+                rgba(
+                    74,
+                    222,
+                    128,
+                    0.12
+                );
+
+            color:
+                #4ade80;
+        }
+
+        .quarantined-badge {
+
+            background:
+                rgba(
+                    248,
+                    113,
+                    113,
+                    0.12
+                );
+
+            color:
+                #f87171;
+        }
+
+        .device-details {
+
+            display:
+                grid;
+
+            grid-template-columns:
+                repeat(
+                    auto-fit,
+                    minmax(
+                        120px,
+                        1fr
+                    )
+                );
+
+            gap:
+                10px;
+
+            margin-top:
+                14px;
+        }
+
+        .detail-box {
+
+            padding:
+                10px;
+
+            background:
+                #1e293b;
+
+            border-radius:
+                8px;
+        }
+
+        .detail-label {
+
+            font-size:
+                11px;
+
+            color:
+                #64748b;
+
+            text-transform:
+                uppercase;
+        }
+
+        .detail-value {
+
+            margin-top:
+                4px;
+
+            font-weight:
+                bold;
+        }
+
+        .confidence-bar-container {
+
+            margin-top:
+                14px;
+
+            height:
+                12px;
+
+            background:
+                #0f172a;
+
+            border-radius:
+                999px;
+
+            overflow:
+                hidden;
+        }
+
+        .confidence-bar {
+
+            height:
+                100%;
+
+            width:
+                0%;
+
+            background:
+                #4ade80;
+
+            transition:
+                width 0.3s ease;
+        }
+
+        .action {
+
+            display:
+                inline-block;
+
+            padding:
+                8px 12px;
+
+            margin:
+                5px 5px 5px 0;
+
+            background:
+                #334155;
+
+            border:
+                1px solid #475569;
+
+            border-radius:
+                8px;
+
+            font-size:
+                13px;
+
+            font-weight:
+                bold;
+        }
+
+        .action-lock {
+
+            color:
+                #facc15;
+        }
+
+        .action-alarm {
+
+            color:
+                #f87171;
+        }
+
+        .event {
+
+            padding:
+                14px 0;
+
+            border-bottom:
+                1px solid #334155;
+        }
+
+        .event:last-child {
+
+            border-bottom:
+                none;
+        }
+
+        .event-type {
+
+            font-weight:
+                bold;
+        }
+
+        .event-time {
+
+            margin-left:
+                8px;
+
+            color:
+                #64748b;
+
+            font-size:
+                12px;
+        }
+
+        .event-data {
+
+            margin-top:
+                6px;
+
+            color:
+                #94a3b8;
+
+            font-size:
+                12px;
+
+            word-break:
+                break-word;
+        }
+
+        .response-card {
+
+            display:
+                flex;
+
+            justify-content:
+                space-between;
+
+            align-items:
+                center;
+
+            gap:
+                20px;
+        }
+
+        .response-action {
+
+            font-size:
+                22px;
+
+            font-weight:
+                bold;
+        }
+
+        .online-dot {
+
+            display:
+                inline-block;
+
+            width:
+                9px;
+
+            height:
+                9px;
+
+            border-radius:
+                50%;
+
+            background:
+                #4ade80;
+
+            margin-right:
+                8px;
+        }
+
+        footer {
+
+            padding:
+                24px 32px;
+
+            color:
+                #64748b;
+
+            font-size:
+                12px;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<header>
+
+    <h1>
+        KERBEROS SECURITY DASHBOARD
+    </h1>
+
+    <p>
+        Distributed-trust smart home security gateway
+    </p>
+
+    <p>
+        <span class="online-dot"></span>
+        Live MQTT status channel
+    </p>
+
+</header>
+
+
+<main>
+
+
+    <!-- ================================================= -->
+    <!-- TOP STATUS CARDS -->
+    <!-- ================================================= -->
+
+    <div class="grid">
+
+
+        <div class="card">
+
+            <div class="label">
+                House State
+            </div>
+
+            <div
+                id="house-state"
+                class="value unknown"
+            >
+                UNKNOWN
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="label">
+                Quorum Decision
+            </div>
+
+            <div
+                id="quorum-decision"
+                class="value"
+            >
+                UNKNOWN
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="label">
+                Quorum Confidence
+            </div>
+
+            <div
+                id="quorum-confidence"
+                class="value"
+            >
+                0.00%
+            </div>
+
+            <div
+                class="confidence-bar-container"
+            >
+
+                <div
+                    id="confidence-bar"
+                    class="confidence-bar"
+                ></div>
+
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="label">
+                Security Events
+            </div>
+
+            <div
+                id="event-count"
+                class="value"
+            >
+                0
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="label">
+                Actuator Commands
+            </div>
+
+            <div
+                id="actuator-count"
+                class="value"
+            >
+                0
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="label">
+                Quarantined
+            </div>
+
+            <div
+                id="quarantine-count"
+                class="value"
+            >
+                0
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- LIVE DEVICES -->
+    <!-- ================================================= -->
+
+    <div class="section">
+
+        <h2>
+            Live Device Trust
+        </h2>
+
+        <div class="card">
+
+            <div id="devices">
+
+                <span class="muted">
+                    Waiting for live gateway state...
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- ANOMALIES -->
+    <!-- ================================================= -->
+
+    <div class="section">
+
+        <h2>
+            Active Anomalies
+        </h2>
+
+        <div class="card">
+
+            <div id="anomalies">
+
+                <span class="good">
+                    No active anomalies
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- LATEST DEFENSE -->
+    <!-- ================================================= -->
+
+    <div class="section">
+
+        <h2>
+            Latest Defense Decision
+        </h2>
+
+        <div class="card">
+
+            <div id="defense">
+
+                <span class="muted">
+                    Waiting for gateway...
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- PHYSICAL RESPONSE -->
+    <!-- ================================================= -->
+
+    <div class="section">
+
+        <h2>
+            Latest Physical Response
+        </h2>
+
+        <div class="card">
+
+            <div id="actuator">
+
+                <span class="muted">
+                    No actuator command recorded.
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- QUARANTINE -->
+    <!-- ================================================= -->
+
+    <div class="section">
+
+        <h2>
+            Quarantined Devices
+        </h2>
+
+        <div class="card">
+
+            <div id="quarantine">
+
+                <span class="good">
+                    No quarantined devices
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- LIVE AUDIT EVENTS -->
+    <!-- ================================================= -->
+
+    <div class="section">
+
+        <h2>
+            Security Audit Trail
+        </h2>
+
+        <div class="card">
+
+            <div id="events">
+
+                <span class="muted">
+                    Loading events...
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+</main>
+
+
+<footer>
+
+    Kerberos —
+    distributed trust,
+    physical consistency,
+    fail-safe defense,
+    tamper-evident auditing.
+
+</footer>
+
+
+<script>
+
+
+// ========================================================
+// HTML SAFETY
+// ========================================================
+
+function escapeHtml(value) {
+
+    return String(value)
+        .replaceAll(
+            "&",
+            "&amp;"
+        )
+        .replaceAll(
+            "<",
+            "&lt;"
+        )
+        .replaceAll(
+            ">",
+            "&gt;"
+        )
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
+        .replaceAll(
+            "'",
+            "&#039;"
+        );
+}
+
+
+// ========================================================
+// STATE CLASS
+// ========================================================
+
+function getStateClass(
+    state
+) {
+
+    const normalized =
+        String(state)
+            .toUpperCase();
+
+    if (normalized === "SAFE") {
+        return "safe";
+    }
+
+    if (normalized === "ALERT") {
+        return "alert";
+    }
+
+    if (normalized === "DEGRADED") {
+        return "degraded";
+    }
+
+    if (normalized === "LOCKDOWN") {
+        return "lockdown";
+    }
+
+    return "unknown";
+}
+
+
+// ========================================================
+// QUORUM CLASS
+// ========================================================
+
+function getDecisionClass(
+    decision
+) {
+
+    const normalized =
+        String(decision)
+            .toUpperCase();
+
+    if (
+        normalized === "INTRUSION"
+    ) {
+        return "alert";
+    }
+
+    if (
+        normalized === "SAFE"
+    ) {
+        return "safe";
+    }
+
+    return "unknown";
+}
+
+
+// ========================================================
+// ACTION HTML
+// ========================================================
+
+function actionHtml(
+    action
+) {
+
+    let extraClass = "";
+
+    if (
+        action === "LOCK_DOOR"
+    ) {
+        extraClass =
+            " action-lock";
+    }
+
+    if (
+        action === "ACTIVATE_ALARM"
+    ) {
+        extraClass =
+            " action-alarm";
+    }
+
+    return `
+        <span class="action${extraClass}">
+            ${escapeHtml(action)}
+        </span>
+    `;
+}
+
+
+// ========================================================
+// UPDATE DASHBOARD
+// ========================================================
+
+async function updateDashboard() {
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/status",
+                {
+                    cache: "no-store"
+                }
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Dashboard API returned " +
+                response.status
+            );
+        }
+
+
+        const data =
+            await response.json();
+
+
+        // =================================================
+        // HOUSE STATE
+        // =================================================
+
+        const houseState =
+            document.getElementById(
+                "house-state"
+            );
+
+        houseState.textContent =
+            data.house_state;
+
+        houseState.className =
+            "value " +
+            getStateClass(
+                data.house_state
+            );
+
+
+        // =================================================
+        // QUORUM
+        // =================================================
+
+        const quorumDecision =
+            document.getElementById(
+                "quorum-decision"
+            );
+
+        quorumDecision.textContent =
+            data.decision ||
+            "UNKNOWN";
+
+        quorumDecision.className =
+            "value " +
+            getDecisionClass(
+                data.decision
+            );
+
+
+        const confidence =
+            Math.max(
+                0,
+                Math.min(
+                    1,
+                    Number(
+                        data.confidence || 0
+                    )
+                )
+            );
+
+
+        document.getElementById(
+            "quorum-confidence"
+        ).textContent =
+            (
+                confidence * 100
+            ).toFixed(2) + "%";
+
+
+        document.getElementById(
+            "confidence-bar"
+        ).style.width =
+            (
+                confidence * 100
+            ) + "%";
+
+
+        // =================================================
+        // COUNTERS
+        // =================================================
+
+        document.getElementById(
+            "event-count"
+        ).textContent =
+            data.event_count || 0;
+
+
+        document.getElementById(
+            "actuator-count"
+        ).textContent =
+            data.actuator_count || 0;
+
+
+        document.getElementById(
+            "quarantine-count"
+        ).textContent =
+            data.quarantined_devices
+                ? data.quarantined_devices.length
+                : 0;
+
+
+        // =================================================
+        // DEVICES
+        // =================================================
+
+        const devicesElement =
+            document.getElementById(
+                "devices"
+            );
+
+
+        const devices =
+            data.devices || {};
+
+
+        const deviceNames =
+            Object.keys(
+                devices
+            );
+
+
+        if (
+            deviceNames.length === 0
+        ) {
+
+            devicesElement.innerHTML =
+                `
+                <span class="muted">
+                    Waiting for live gateway state...
+                </span>
+                `;
+
+        } else {
+
+            devicesElement.innerHTML =
+                deviceNames
+                    .map(
+                        device => {
+
+                            const info =
+                                devices[
+                                    device
+                                ] || {};
+
+                            const status =
+                                String(
+                                    info.status ||
+                                    "UNKNOWN"
+                                ).toUpperCase();
+
+                            const quarantined =
+                                status ===
+                                "QUARANTINED";
+
+                            const badgeClass =
+                                quarantined
+                                    ? "quarantined-badge"
+                                    : "trusted-badge";
+
+                            const badgeText =
+                                quarantined
+                                    ? "QUARANTINED"
+                                    : "TRUSTED";
+
+
+                            const trust =
+                                Number(
+                                    info.trust || 0
+                                );
+
+
+                            return `
+                                <div class="device">
+
+                                    <div class="device-header">
+
+                                        <div class="device-name">
+                                            ${escapeHtml(
+                                                device
+                                            )}
+                                        </div>
+
+                                        <div
+                                            class="status-badge ${badgeClass}"
+                                        >
+                                            ${badgeText}
+                                        </div>
+
+                                    </div>
+
+                                    <div class="device-details">
+
+                                        <div class="detail-box">
+
+                                            <div class="detail-label">
+                                                Observation
+                                            </div>
+
+                                            <div class="detail-value">
+                                                ${escapeHtml(
+                                                    info.state ??
+                                                    "UNKNOWN"
+                                                )}
+                                            </div>
+
+                                        </div>
+
+                                        <div class="detail-box">
+
+                                            <div class="detail-label">
+                                                Trust
+                                            </div>
+
+                                            <div class="detail-value">
+                                                ${escapeHtml(
+                                                    trust
+                                                )}
+                                            </div>
+
+                                        </div>
+
+                                        <div class="detail-box">
+
+                                            <div class="detail-label">
+                                                Status
+                                            </div>
+
+                                            <div class="detail-value">
+                                                ${escapeHtml(
+                                                    status
+                                                )}
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+                            `;
+                        }
+                    )
+                    .join("");
+        }
+
+
+        // =================================================
+        // ANOMALIES
+        // =================================================
+
+        const anomaliesElement =
+            document.getElementById(
+                "anomalies"
+            );
+
+
+        const anomalies =
+            data.anomalous_devices ||
+            [];
+
+
+        if (
+            anomalies.length === 0
+        ) {
+
+            anomaliesElement.innerHTML =
+                `
+                <span class="good">
+                    ✅ No active anomalies
+                </span>
+                `;
+
+        } else {
+
+            anomaliesElement.innerHTML =
+                anomalies
+                    .map(
+                        device => `
+                            <div class="device">
+
+                                <span class="bad">
+                                    ⚠️
+                                </span>
+
+                                <strong>
+                                    ${escapeHtml(
+                                        device
+                                    )}
+                                </strong>
+
+                                <span class="muted">
+                                    behavioural anomaly detected
+                                </span>
+
+                            </div>
+                        `
+                    )
+                    .join("");
+        }
+
+
+        // =================================================
+        // DEFENSE
+        // =================================================
+
+        const defenseElement =
+            document.getElementById(
+                "defense"
+            );
+
+
+        if (
+            data.latest_defense
+        ) {
+
+            const defense =
+                data.latest_defense;
+
+
+            let html = "";
+
+
+            html += `
+                <p>
+                    <strong>State:</strong>
+                    <span class="${getStateClass(
+                        defense.state
+                    )}">
+                        ${escapeHtml(
+                            defense.state
+                        )}
+                    </span>
+                </p>
+            `;
+
+
+            html += `
+                <p>
+                    <strong>Intrusion detected:</strong>
+                    ${defense.intrusion_detected
+                        ? '<span class="bad">YES</span>'
+                        : '<span class="good">NO</span>'}
+                </p>
+            `;
+
+
+            html += `
+                <p>
+                    <strong>Decision time:</strong>
+                    ${escapeHtml(
+                        defense.timestamp
+                    )}
+                </p>
+            `;
+
+
+            html += `
+                <p>
+                    <strong>Actions:</strong>
+                </p>
+            `;
+
+
+            const actions =
+                defense.actions || [];
+
+
+            if (
+                actions.length === 0
+            ) {
+
+                html += `
+                    <span class="muted">
+                        No action required.
+                    </span>
+                `;
+
+            } else {
+
+                html += actions
+                    .map(
+                        action =>
+                            actionHtml(
+                                action
+                            )
+                    )
+                    .join("");
+            }
+
+
+            defenseElement.innerHTML =
+                html;
+
+        } else {
+
+            defenseElement.innerHTML =
+                `
+                <span class="muted">
+                    Waiting for gateway defense decision...
+                </span>
+                `;
+        }
+
+
+        // =================================================
+        // ACTUATOR
+        // =================================================
+
+        const actuatorElement =
+            document.getElementById(
+                "actuator"
+            );
+
+
+        if (
+            data.latest_actuator
+        ) {
+
+            const actuator =
+                data.latest_actuator;
+
+
+            let icon =
+                "⚙️";
+
+
+            if (
+                actuator.action ===
+                "LOCK_DOOR"
+            ) {
+
+                icon =
+                    "🔒";
+            }
+
+
+            if (
+                actuator.action ===
+                "ACTIVATE_ALARM"
+            ) {
+
+                icon =
+                    "🚨";
+            }
+
+
+            actuatorElement.innerHTML =
+                `
+                <div class="response-card">
+
+                    <div>
+
+                        <div class="label">
+                            Latest Command
+                        </div>
+
+                        <div class="response-action">
+                            ${icon}
+                            ${escapeHtml(
+                                actuator.action
+                            )}
+                        </div>
+
+                    </div>
+
+                    <div>
+
+                        <div class="label">
+                            Time
+                        </div>
+
+                        <div class="small-value">
+                            ${escapeHtml(
+                                actuator.timestamp
+                            )}
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <p class="muted">
+                    Command ID:
+                    ${escapeHtml(
+                        actuator.command_id
+                    )}
+                </p>
+
+                <p class="muted">
+                    Topic:
+                    ${escapeHtml(
+                        actuator.topic
+                    )}
+                </p>
+                `;
+
+        } else {
+
+            actuatorElement.innerHTML =
+                `
+                <span class="muted">
+                    No actuator command recorded.
+                </span>
+                `;
+        }
+
+
+        // =================================================
+        // QUARANTINE
+        // =================================================
+
+        const quarantineElement =
+            document.getElementById(
+                "quarantine"
+            );
+
+
+        const quarantined =
+            data.quarantined_devices ||
+            [];
+
+
+        if (
+            quarantined.length === 0
+        ) {
+
+            quarantineElement.innerHTML =
+                `
+                <span class="good">
+                    ✅ No quarantined devices
+                </span>
+                `;
+
+        } else {
+
+            quarantineElement.innerHTML =
+                quarantined
+                    .map(
+                        device => `
+                            <div class="device">
+
+                                <div class="device-header">
+
+                                    <div class="device-name bad">
+                                        🚫
+                                        ${escapeHtml(
+                                            device
+                                        )}
+                                    </div>
+
+                                    <div
+                                        class="status-badge quarantined-badge"
+                                    >
+                                        QUARANTINED
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        `
+                    )
+                    .join("");
+        }
+
+
+        // =================================================
+        // SECURITY EVENTS
+        // =================================================
+
+        const eventsElement =
+            document.getElementById(
+                "events"
+            );
+
+
+        const events =
+            data.recent_events || [];
+
+
+        if (
+            events.length === 0
+        ) {
+
+            eventsElement.innerHTML =
+                `
+                <span class="muted">
+                    No security events recorded.
+                </span>
+                `;
+
+        } else {
+
+            eventsElement.innerHTML =
+                events
+                    .map(
+                        event => {
+
+                            const eventData =
+                                JSON.stringify(
+                                    event.data || {}
+                                );
+
+
+                            return `
+                                <div class="event">
+
+                                    <div>
+
+                                        <span class="event-type">
+                                            ${escapeHtml(
+                                                event.event_type
+                                            )}
+                                        </span>
+
+                                        <span class="event-time">
+                                            ${escapeHtml(
+                                                event.timestamp
+                                            )}
+                                        </span>
+
+                                    </div>
+
+                                    <div class="event-data">
+                                        ${escapeHtml(
+                                            eventData
+                                        )}
+                                    </div>
+
+                                </div>
+                            `;
+                        }
+                    )
+                    .join("");
+        }
+
+    } catch (error) {
+
+        console.error(
+            "[DASHBOARD] Update failed:",
+            error
+        );
+
+    }
+}
+
+
+// ========================================================
+// START
+// ========================================================
+
+updateDashboard();
+
+setInterval(
+    updateDashboard,
+    2000
+);
+
+</script>
+
+
+</body>
+
+</html>
